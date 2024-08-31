@@ -17,6 +17,31 @@
 #include QMK_KEYBOARD_H
 #include "muse.h"
 
+// Add these definitions at the top of your file
+#ifdef RGBLIGHT_ENABLE
+#define RGBLIGHT_EFFECT_BREATHING
+#define RGBLIGHT_EFFECT_RAINBOW_MOOD
+#define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+#define RGBLIGHT_EFFECT_SNAKE
+#define RGBLIGHT_EFFECT_KNIGHT
+#define RGBLIGHT_EFFECT_CHRISTMAS
+#define RGBLIGHT_EFFECT_STATIC_GRADIENT
+#define RGBLIGHT_EFFECT_RGB_TEST
+#define RGBLIGHT_EFFECT_ALTERNATING
+#define RGBLIGHT_EFFECT_TWINKLE
+#endif
+
+// Rainbow effect settings
+#ifdef RGBLIGHT_ENABLE
+void keyboard_post_init_user(void) {
+    rgblight_enable_noeeprom();
+    rgblight_mode_noeeprom(RGBLIGHT_MODE_RAINBOW_SWIRL);
+    rgblight_sethsv_noeeprom(0, 255, 255);
+}
+
+uint32_t rainbow_timer = 0;
+#endif
+
 enum preonic_layers {
   _QWERTY,
   _COLEMAK,
@@ -47,14 +72,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------|------+------+------+------+------+------|
  * | Shift|   Z  |   X  |   C  |   V  |   B  |   N  |   M  |   ,  |   .  |   /  | ' (?)|
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Ctrl |CmdOpt| Alt  |   CmdShift   |Cmd   |Raise |Space |Cmd| Down |  Up  | Left |Right |
+ * | Ctrl |CmdOpt| Opt |CmdShft| Cmd  |Raise |Space |  Cmd  | Down |  Up  | Left |Right |
  * `-----------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT_preonic_grid(
-  KC_GRV,  KC_1,         KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
-  KC_TAB,  KC_Q,         KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
-  KC_CAPS, KC_A,         KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
-  KC_LSFT, KC_Z,         KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_QUOT,
+  KC_GRV,  KC_1,         KC_2,    KC_3,          KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
+  KC_TAB,  KC_Q,         KC_W,    KC_E,          KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC,
+  KC_CAPS, KC_A,         KC_S,    KC_D,          KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_ENT,
+  KC_LSFT, KC_Z,         KC_X,    KC_C,          KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_QUOT,
   KC_LCTL, LCMD(KC_LALT), KC_LALT, LCMD(KC_LSFT), KC_LGUI, RAISE,   KC_SPC,  KC_LGUI, KC_DOWN, KC_UP,   KC_LEFT, KC_RGHT
 ),
 
@@ -284,6 +309,16 @@ bool dip_switch_update_user(uint8_t index, bool active) {
 
 
 void matrix_scan_user(void) {
+#ifdef RGBLIGHT_ENABLE
+    static uint32_t rainbow_timer = 0;
+    static uint8_t current_hue = 0;
+    if (timer_elapsed32(rainbow_timer) > 100) {  // Increased from 25 to 100 for slower change
+        current_hue = (current_hue + 1) % 255;  // Increment hue by 1
+        rgblight_sethsv_noeeprom(current_hue, 255, 255);
+        rainbow_timer = timer_read32();
+    }
+#endif
+
 #ifdef AUDIO_ENABLE
     if (muse_mode) {
         if (muse_counter == 0) {

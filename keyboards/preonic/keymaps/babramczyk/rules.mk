@@ -1,1 +1,4 @@
 SRC += muse.c
+
+RGBLIGHT_ENABLE = yes
+RGBLIGHT_ANIMATIONS = yes
