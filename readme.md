@@ -3,6 +3,7 @@
 1. Make changes to [this file](keyboards/preonic/keymaps/babramczyk/keymap.c)
 2. `qmk compile`
 3. `qmk flash`
+4. Press reset button on back of keyboard (might take a few tries) (there's alternate methods, too, for getting into bootloader mode)
 
 ## Notes
 
